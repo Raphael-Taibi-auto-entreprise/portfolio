@@ -1,3 +1,5 @@
+import { metadata } from "./layout";
+
 export default function RootPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6">
