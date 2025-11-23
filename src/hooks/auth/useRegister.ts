@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { isValidEmail, validatePasswordStrength, isRequired } from 'cs-tools-kit';
-import { userAgent } from 'next/server';
 
 export const useRegister = () => {
     const [email, setEmail] = React.useState('');
