@@ -5,7 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 export const authOptions: NextAuthOptions = {
     providers: [
         CredentialsProvider({
-            name: 'Admin Credentials',
+            name: 'Credentials',
             credentials: {
                 username: { label: "Username", type: "text" },
                 password: { label: "Password", type: "password" }
@@ -26,7 +26,7 @@ export const authOptions: NextAuthOptions = {
         strategy: "jwt",
     },
     pages: {
-        signIn: '/admin/login',
+        signIn: '/login',
     },
 };
 
