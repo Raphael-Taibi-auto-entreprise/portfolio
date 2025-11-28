@@ -9,5 +9,5 @@ export default interface RegisterFormProps {
     setConfirmPassword: (v: string) => void;
     error: string | null;
     loading: boolean;
-    onSubmit: () => void;
+    onSubmit: (e: React.FormEvent) => void;
 } 

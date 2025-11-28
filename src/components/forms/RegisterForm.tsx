@@ -29,10 +29,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
                     header={<h2 className='text-2xl font-bold text-center'>Register</h2>}
                 >
                     <form
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            onSubmit();
-                        }}
+                        onSubmit={onSubmit}
                         className='flex flex-col gap-4'
                     >
                         <Input placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} />
