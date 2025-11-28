@@ -1,4 +1,4 @@
-'use cleint';
+'use client';
 
 import React, { useState } from 'react';
 import { isValidEmail, isRequired } from 'cs-tools-kit';
