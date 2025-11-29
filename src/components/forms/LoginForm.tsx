@@ -13,6 +13,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     error,
     loading,
     onSubmit,
+
+    
 }) => {
     return ( 
         <div className='min-h-screen flex items-center justify-center bg-gray-100 p-4'>

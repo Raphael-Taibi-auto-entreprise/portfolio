@@ -7,12 +7,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "migrate:dev": "dotenv -e .env.local -- prisma migrate dev --config=prisma/prisma.config.ts --schema=prisma/schema.prisma"
+    "migrate:dev": "dotenv -e .env.local -- prisma migrate dev --config=prisma/prisma.config.ts --schema=prisma/schema.prisma",
+    "studio": "dotenv -e .env.local -- prisma studio"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.0.0",
     "@prisma/client": "^7.0.0",
     "@radix-ui/react-slot": "^1.2.4",
+    "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cs-tools-kit": "^0.1.1",
@@ -26,6 +28,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20",
     "@types/pg": "^8.15.6",
     "@types/react": "^19",

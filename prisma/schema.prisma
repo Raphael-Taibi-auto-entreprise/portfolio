@@ -8,28 +8,74 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model Message {
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  role      String   @default("user")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Contact {
   id        String   @id @default(cuid())
   name      String
   email     String
-  content   String
+  subject   String?
+  message   String
+  status    String   @default("unread") // "unread", "read", "replied"
   createdAt DateTime @default(now())
+  
+  @@map("contacts")
 }
 
-model Devis {
+model Quote {
   id          String   @id @default(cuid())
   name        String
   email       String
+  phone       String?
+  company     String?
   projectType String
-  details     String
+  budget      String?
+  deadline    String?
+  description String
+  status      String   @default("pending") // "pending", "reviewed", "accepted", "rejected"
   createdAt   DateTime @default(now())
+  
+  @@map("quotes")
 }
 
-model Avis {
+model Review {
   id        String   @id @default(cuid())
   name      String
-  rating    Int
+  email     String?
+  company   String?
+  role      String?
+  rating    Int      // 1 à 5
   comment   String
+  status    String   @default("pending") // "pending", "approved", "rejected"
+  isPublic  Boolean  @default(false)
   createdAt DateTime @default(now())
+  
+  @@map("reviews")
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String
+  longDesc    String?
+  imageUrl    String?
+  technologies String[] // Array de strings (ex: ["Next.js", "TypeScript"])
+  demoUrl     String?
+  githubUrl   String?
+  status      String   @default("draft") // "draft", "published"
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("projects")
 }
 
