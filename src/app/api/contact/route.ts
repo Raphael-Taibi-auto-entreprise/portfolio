@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
         name: data.name,
         email: data.email,
         message: data.message,
-        status: "unread ",
+        status: "unread",
         subject: data.subject || null,
       },
     });
