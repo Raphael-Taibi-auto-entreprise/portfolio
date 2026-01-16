@@ -28,7 +28,6 @@ export default function Navbar() {
             <Link href="/contact" className="hover:text-gray-300">
               Contact
             </Link>
-
             <UserProfile />
           </div>
         </div>
