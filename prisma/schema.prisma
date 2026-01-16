@@ -1,11 +1,9 @@
-// Define database connection via the `DATABASE_URL` env var
-datasource db {
-  provider = "postgresql"
-}
-
-// Define custom output path for generated Prisma Client
 generator client {
   provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
 }
 
 model User {
@@ -13,20 +11,21 @@ model User {
   email     String   @unique
   username  String   @unique
   password  String
-  role      String   @default("user")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  role      String   @default("user")
 }
 
 model Contact {
-  id        String   @id @default(cuid())
-  name      String
-  email     String
-  subject   String?
-  message   String
-  status    String   @default("unread") // "unread", "read", "replied"
-  createdAt DateTime @default(now())
-  
+  id              String            @id @default(cuid())
+  name            String
+  email           String
+  subject         String?
+  message         String
+  status          String            @default("unread")
+  createdAt       DateTime          @default(now())
+  contact_replies contact_replies[]
+
   @@map("contacts")
 }
 
@@ -40,9 +39,9 @@ model Quote {
   budget      String?
   deadline    String?
   description String
-  status      String   @default("pending") // "pending", "reviewed", "accepted", "rejected"
+  status      String   @default("pending")
   createdAt   DateTime @default(now())
-  
+
   @@map("quotes")
 }
 
@@ -52,30 +51,38 @@ model Review {
   email     String?
   company   String?
   role      String?
-  rating    Int      // 1 à 5
+  rating    Int
   comment   String
-  status    String   @default("pending") // "pending", "approved", "rejected"
+  status    String   @default("pending")
   isPublic  Boolean  @default(false)
   createdAt DateTime @default(now())
-  
+
   @@map("reviews")
 }
 
 model Project {
-  id          String   @id @default(cuid())
-  title       String
-  slug        String   @unique
-  description String
-  longDesc    String?
-  imageUrl    String?
-  technologies String[] // Array de strings (ex: ["Next.js", "TypeScript"])
-  demoUrl     String?
-  githubUrl   String?
-  status      String   @default("draft") // "draft", "published"
-  featured    Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
+  id           String   @id @default(cuid())
+  title        String
+  slug         String   @unique
+  description  String
+  longDesc     String?
+  imageUrl     String?
+  technologies String[]
+  demoUrl      String?
+  githubUrl    String?
+  status       String   @default("draft")
+  featured     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
   @@map("projects")
 }
 
+model contact_replies {
+  id        String   @id
+  contactId String
+  message   String
+  sentBy    String
+  createdAt DateTime @default(now())
+  contacts  Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+}
