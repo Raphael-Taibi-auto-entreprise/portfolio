@@ -56,7 +56,7 @@ export async function replyToMessage(messageId: string, replyContent: string) {
     const emailResult = await sendContactReplyEmail({
       to: contact.email,
       name: contact.name,
-      subject: contact.subject,
+      subject: contact.subject || "Votre message",
       replyMessage: replyContent,
     });
 
