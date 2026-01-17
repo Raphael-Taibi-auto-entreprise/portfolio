@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import MessageReplyForm from "@/components/forms/MessageReplyForm";
 import { User, UserCircle } from "lucide-react";
 
@@ -20,6 +21,8 @@ interface MessageThreadProps {
 
 export default function MessageThread({ message, replies }: MessageThreadProps) {
   const [showReplyForm, setShowReplyForm] = useState(false);
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.role === "admin";
 
   return (
     <div className="space-y-6">
@@ -48,30 +51,39 @@ export default function MessageThread({ message, replies }: MessageThreadProps) 
       </div>
 
       {/* Réponses */}
-      {replies.map((reply) => (
-        <div key={reply.id} className="flex gap-4">
-          <div className="flex-shrink-0">
-            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-              <UserCircle size={20} className="text-green-600" />
+      {replies.map((reply) => {
+        const isMyMessage = (isAdmin && reply.sentBy === "admin") || (!isAdmin && reply.sentBy === "user");
+        const displayName = reply.sentBy === "admin" ? "Support" : message.name || "Utilisateur";
+        
+        return (
+          <div key={reply.id} className="flex gap-4">
+            <div className="flex-shrink-0">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                reply.sentBy === "admin" ? "bg-green-100" : "bg-blue-100"
+              }`}>
+                <UserCircle size={20} className={reply.sentBy === "admin" ? "text-green-600" : "text-blue-600"} />
+              </div>
+            </div>
+            <div className="flex-1">
+              <div className={`rounded-lg p-4 ${
+                reply.sentBy === "admin" ? "bg-green-50" : "bg-blue-50"
+              }`}>
+                <p className="text-sm text-gray-500 mb-2">
+                  {isMyMessage ? "Vous" : displayName} -{" "}
+                  {new Date(reply.createdAt).toLocaleDateString("fr-FR", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+                <p className="text-gray-800 whitespace-pre-wrap">{reply.message}</p>
+              </div>
             </div>
           </div>
-          <div className="flex-1">
-            <div className="bg-green-50 rounded-lg p-4">
-              <p className="text-sm text-gray-500 mb-2">
-                {reply.sentBy === "admin" ? "Vous" : reply.sentBy} -{" "}
-                {new Date(reply.createdAt).toLocaleDateString("fr-FR", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </p>
-              <p className="text-gray-800 whitespace-pre-wrap">{reply.message}</p>
-            </div>
-          </div>
-        </div>
-      ))}
+        );
+      })}
 
       {/* Formulaire de réponse */}
       <div className="pt-4 border-t">
