@@ -17,6 +17,7 @@ export default function RegisterPage() {
             confirmPassword={register.confirmPassword}
             setConfirmPassword={register.setConfirmPassword}
             error={register.error}
+            success={register.success}
             loading={register.loading}
             onSubmit={register.handleSubmit}
         />

@@ -8,6 +8,7 @@ export default interface RegisterFormProps {
     confirmPassword: string;
     setConfirmPassword: (v: string) => void;
     error: string | null;
+    success: string | null;
     loading: boolean;
     onSubmit: (e: React.FormEvent) => void;
 } 
