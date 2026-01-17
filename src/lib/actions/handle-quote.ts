@@ -7,6 +7,7 @@ import {
   sendQuoteRejectedEmail, 
   sendQuoteNegotiationEmail 
 } from "@/lib/email";
+import { sseManager } from "@/lib/sse-manager";
 
 /**
  * Valide un devis et envoie un email de confirmation
@@ -38,8 +39,17 @@ export async function approveQuote(quoteId: string) {
     if (!emailResult.success) {
       console.warn("Email non envoyé, mais devis approuvé:", emailResult.error);
     }
+
+    /* Notifier l'utilisateur via SSE si il a un compte */
+    if (quote.userId) {
+      sseManager.sendToUser(quote.userId, {
+        type: "quote_status_changed",
+        data: { quoteId, status: "approved", projectType: quote.projectType },
+      });
+    }
     
     revalidatePath("/admin/devis");
+    revalidatePath("/mes-devis");
     return { success: true };
   } catch (error) {
     console.error("Erreur lors de la validation:", error);
@@ -78,6 +88,15 @@ export async function rejectQuote(quoteId: string, reason?: string) {
 
     if (!emailResult.success) {
       console.warn("Email non envoyé, mais devis refusé:", emailResult.error);
+    }
+
+    /* Notifier l'utilisateur via SSE si il a un compte */
+    if (quote.userId) {
+      sseManager.sendToUser(quote.userId, {
+        type: "quote_status_changed",
+        data: { quoteId, status: "rejected", projectType: quote.projectType },
+      });
+    }
     }
     
     revalidatePath("/admin/devis");

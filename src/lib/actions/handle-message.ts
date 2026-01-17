@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { sendContactReplyEmail } from "@/lib/email";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { sseManager } from "@/lib/sse-manager";
 
 /**
  * Marque un message comme lu
@@ -75,6 +76,20 @@ export async function replyToMessage(messageId: string, replyContent: string) {
       if (!emailResult.success) {
         console.warn("Email non envoyé, mais réponse sauvegardée:", emailResult.error);
       }
+
+      /* Notifier l'utilisateur via SSE si il a un compte */
+      if (contact.userId) {
+        sseManager.sendToUser(contact.userId, {
+          type: "message_reply",
+          data: { messageId, subject: contact.subject || "Votre message" },
+        });
+      }
+    } else {
+      /* Si c'est l'utilisateur qui répond, notifier les admins */
+      sseManager.sendToAdmins({
+        type: "new_message",
+        data: { messageId, subject: contact.subject || "Message sans objet", from: contact.name },
+      });
     }
 
     revalidatePath("/admin/messages");
