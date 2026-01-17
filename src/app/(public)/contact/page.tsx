@@ -2,8 +2,10 @@
 
 import { ContactForm } from "@/components/forms/ContactForm";
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 
 export default function ContactPage() {
+    const { data: session } = useSession();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [subject, setSubject] = useState('');
@@ -21,7 +23,13 @@ export default function ContactPage() {
             const response = await fetch('/api/contact', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, subject, message }),
+                body: JSON.stringify({ 
+                    name, 
+                    email, 
+                    subject, 
+                    message,
+                    userId: session?.user?.id || null,
+                }),
             });
 
             if (!response.ok) throw new Error('Erreur lors de l\'envoi');

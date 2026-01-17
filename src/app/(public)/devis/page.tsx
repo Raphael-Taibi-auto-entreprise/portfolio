@@ -2,8 +2,10 @@
 
 import { QuoteForm } from "@/components/forms/QuoteForm";
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 
 export default function DevisPage() {
+    const { data: session } = useSession();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
@@ -27,7 +29,8 @@ export default function DevisPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     name, email, phone, company, 
-                    projectType, budget, deadline, description 
+                    projectType, budget, deadline, description,
+                    userId: session?.user?.id || null,
                 }),
             });
 
