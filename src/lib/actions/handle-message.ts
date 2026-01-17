@@ -3,6 +3,8 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { sendContactReplyEmail } from "@/lib/email";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 /**
  * Marque un message comme lu
@@ -27,6 +29,15 @@ export async function markAsRead(messageId: string) {
  */
 export async function replyToMessage(messageId: string, replyContent: string) {
   try {
+    /* Récupérer la session pour déterminer qui répond */
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user) {
+      return { success: false, error: "Non authentifié" };
+    }
+
+    const isAdmin = session.user.role === "admin";
+
     /* Récupérer les infos du message */
     const contact = await prisma.contact.findUnique({
       where: { id: messageId },
@@ -42,7 +53,7 @@ export async function replyToMessage(messageId: string, replyContent: string) {
         id: `reply_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         contactId: messageId,
         message: replyContent,
-        sentBy: "admin",
+        sentBy: isAdmin ? "admin" : "user",
       },
     });
 
@@ -52,19 +63,22 @@ export async function replyToMessage(messageId: string, replyContent: string) {
       data: { status: "replied" },
     });
 
-    /* Envoyer l'email de réponse */
-    const emailResult = await sendContactReplyEmail({
-      to: contact.email,
-      name: contact.name,
-      subject: contact.subject || "Votre message",
-      replyMessage: replyContent,
-    });
+    /* Envoyer l'email de réponse uniquement si c'est l'admin qui répond */
+    if (isAdmin) {
+      const emailResult = await sendContactReplyEmail({
+        to: contact.email,
+        name: contact.name,
+        subject: contact.subject || "Votre message",
+        replyMessage: replyContent,
+      });
 
-    if (!emailResult.success) {
-      console.warn("Email non envoyé, mais réponse sauvegardée:", emailResult.error);
+      if (!emailResult.success) {
+        console.warn("Email non envoyé, mais réponse sauvegardée:", emailResult.error);
+      }
     }
 
     revalidatePath("/admin/messages");
+    revalidatePath("/mes-messages");
     return { success: true };
   } catch (error) {
     console.error("Erreur lors de la réponse:", error);

@@ -127,17 +127,19 @@ export default function MessageThreadView({ message, userId }: MessageThreadView
           {message.contact_replies.map((reply) => (
             <div key={reply.id} className="p-6 border-t border-gray-200">
               <div className="flex items-start gap-3 mb-3">
-                <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                  reply.sentBy === "admin" ? "bg-green-100" : "bg-blue-100"
+                }`}>
                   {reply.sentBy === "admin" ? (
                     <Shield size={20} className="text-green-600" />
                   ) : (
-                    <User size={20} className="text-green-600" />
+                    <User size={20} className="text-blue-600" />
                   )}
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <p className="font-medium text-gray-800">
-                      {reply.sentBy === "admin" ? "Administrateur" : "Vous"}
+                      {reply.sentBy === "admin" ? "Support" : "Vous"}
                     </p>
                     <time className="text-sm text-gray-500">
                       {new Date(reply.createdAt).toLocaleDateString("fr-FR", {

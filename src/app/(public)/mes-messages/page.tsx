@@ -22,6 +22,14 @@ export default async function MesMessagesPage() {
           createdAt: "asc",
         },
       },
+      user: {
+        select: {
+          username: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+        },
+      },
     },
     orderBy: {
       createdAt: "desc",

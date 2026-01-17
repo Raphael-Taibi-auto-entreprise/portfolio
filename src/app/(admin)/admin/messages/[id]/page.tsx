@@ -19,6 +19,14 @@ export default async function MessageDetailPage({ params }: MessageDetailPagePro
       contact_replies: {
         orderBy: { createdAt: "asc" },
       },
+      user: {
+        select: {
+          username: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+        },
+      },
     },
   });
 

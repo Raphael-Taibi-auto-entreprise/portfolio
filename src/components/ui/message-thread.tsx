@@ -10,6 +10,12 @@ interface MessageThreadProps {
     id: string;
     message: string;
     createdAt: Date;
+    user?: {
+      username: string;
+      email: string;
+      firstName: string | null;
+      lastName: string | null;
+    } | null;
   };
   replies: Array<{
     id: string;
@@ -24,9 +30,22 @@ export default function MessageThread({ message, replies }: MessageThreadProps) 
   const { data: session } = useSession();
   const isAdmin = session?.user?.role === "admin";
 
+  /* Détermine le nom d'affichage de l'utilisateur */
+  const getUserDisplayName = () => {
+    if (!message.user) return "Utilisateur";
+    const { firstName, lastName, username, email } = message.user;
+    
+    if (firstName && lastName) {
+      return `${firstName} ${lastName}`;
+    }
+    return `@${username} (${email})`;
+  };
+
+  const userDisplayName = getUserDisplayName();
+
   return (
     <div className="space-y-6">
-      {/* Message initial */}
+      {/* Message initial - toujours de l'utilisateur dans ce composant */}
       <div className="flex gap-4">
         <div className="flex-shrink-0">
           <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
@@ -36,7 +55,7 @@ export default function MessageThread({ message, replies }: MessageThreadProps) 
         <div className="flex-1">
           <div className="bg-gray-50 rounded-lg p-4">
             <p className="text-sm text-gray-500 mb-2">
-              Message initial -{" "}
+              {isAdmin ? userDisplayName : "Vous"} -{" "}
               {new Date(message.createdAt).toLocaleDateString("fr-FR", {
                 day: "numeric",
                 month: "long",
@@ -52,8 +71,16 @@ export default function MessageThread({ message, replies }: MessageThreadProps) 
 
       {/* Réponses */}
       {replies.map((reply) => {
-        const isMyMessage = (isAdmin && reply.sentBy === "admin") || (!isAdmin && reply.sentBy === "user");
-        const displayName = reply.sentBy === "admin" ? "Support" : message.name || "Utilisateur";
+        /* Détermine si c'est mon propre message */
+        const isMyReply = (isAdmin && reply.sentBy === "admin") || (!isAdmin && reply.sentBy === "user");
+        
+        /* Détermine le nom à afficher */
+        let displayName = userDisplayName;
+        if (isMyReply) {
+          displayName = "Vous";
+        } else if (reply.sentBy === "admin") {
+          displayName = "Support";
+        }
         
         return (
           <div key={reply.id} className="flex gap-4">
@@ -66,10 +93,10 @@ export default function MessageThread({ message, replies }: MessageThreadProps) 
             </div>
             <div className="flex-1">
               <div className={`rounded-lg p-4 ${
-                reply.sentBy === "admin" ? "bg-green-50" : "bg-blue-50"
+                reply.sentBy === "admin" ? "bg-green-50 border border-green-200" : "bg-blue-50 border border-blue-200"
               }`}>
                 <p className="text-sm text-gray-500 mb-2">
-                  {isMyMessage ? "Vous" : displayName} -{" "}
+                  {displayName} -{" "}
                   {new Date(reply.createdAt).toLocaleDateString("fr-FR", {
                     day: "numeric",
                     month: "long",
