@@ -20,6 +20,7 @@ export async function POST(req: NextRequest) {
         message: data.message,
         status: "unread",
         subject: data.subject || null,
+        userId: data.userId || null,
       },
     });
     return NextResponse.json(newMessage, { status: 201 });

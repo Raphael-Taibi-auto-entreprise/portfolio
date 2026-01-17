@@ -15,8 +15,43 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Portfolio Auto-entreprise",
-  description: 'Portfolio pour mon auto-entreprise, permet de présenter mes projets et compétences. Contacter moi pour plus d\'informations.',
+  metadataBase: new URL(process.env.NEXTAUTH_URL || 'http://localhost:3000'),
+  title: {
+    default: "Développeur Full Stack | Portfolio Professionnel",
+    template: "%s | Portfolio",
+  },
+  description: 'Développeur Full Stack spécialisé en React, Next.js et TypeScript. Création d\'applications web modernes et performantes sur mesure.',
+  keywords: [
+    "développeur full stack",
+    "développeur web",
+    "React",
+    "Next.js",
+    "TypeScript",
+    "développement web",
+    "freelance",
+    "portfolio développeur",
+  ],
+  authors: [{ name: "Portfolio" }],
+  creator: "Portfolio",
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    siteName: "Portfolio Développeur Full Stack",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: 'google-site-verification-code',
+  },
 };
 
 export default function RootLayout({
@@ -25,13 +60,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="fr">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
           <Navbar />
-            <main className="flex-1">{children}</main>
+          <main className="flex-1">{children}</main>
           <footer className="bg-gray-800 text-white p-4 text-center">Footer</footer>
         </AuthProvider>
       </body>

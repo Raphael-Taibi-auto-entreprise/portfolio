@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
         deadline: data.deadline || null,
         description: data.description,
         status: "pending",
+        userId: data.userId || null,
       },
     });
     return NextResponse.json(newQuote, { status: 201 });

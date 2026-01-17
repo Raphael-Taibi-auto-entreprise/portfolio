@@ -7,13 +7,22 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  username  String   @unique
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  role      String   @default("user")
+  id         String    @id @default(cuid())
+  email      String    @unique
+  username   String    @unique
+  password   String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  role       String    @default("user")
+  firstName  String?
+  lastName   String?
+  phone      String?
+  address    String?
+  postalCode String?
+  city       String?
+  country    String?   @default("France")
+  contacts   Contact[]
+  quotes     Quote[]
 }
 
 model Contact {
@@ -24,9 +33,20 @@ model Contact {
   message         String
   status          String            @default("unread")
   createdAt       DateTime          @default(now())
+  userId          String?
+  user            User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
   contact_replies contact_replies[]
 
   @@map("contacts")
+}
+
+model contact_replies {
+  id        String   @id @default(cuid())
+  contactId String
+  message   String
+  sentBy    String
+  createdAt DateTime @default(now())
+  contact   Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
 }
 
 model Quote {
@@ -41,6 +61,8 @@ model Quote {
   description String
   status      String   @default("pending")
   createdAt   DateTime @default(now())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("quotes")
 }
@@ -76,13 +98,4 @@ model Project {
   updatedAt    DateTime @updatedAt
 
   @@map("projects")
-}
-
-model contact_replies {
-  id        String   @id
-  contactId String
-  message   String
-  sentBy    String
-  createdAt DateTime @default(now())
-  contacts  Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
 }

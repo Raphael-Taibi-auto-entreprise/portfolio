@@ -1,0 +1,2 @@
+-- Migration from database
+-- This migration was applied directly to the database
