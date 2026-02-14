@@ -58,11 +58,18 @@ export async function replyToMessage(messageId: string, replyContent: string) {
       },
     });
 
-    /* Marquer le message comme répondu */
+    /* Mettre à jour le statut selon qui répond */
+    const newStatus = isAdmin ? "replied" : "unread";
+    console.log(`[handle-message] Mise à jour statut: ${contact.status} → ${newStatus} (isAdmin: ${isAdmin})`);
+    
     await prisma.contact.update({
       where: { id: messageId },
-      data: { status: "replied" },
+      data: { 
+        status: newStatus,
+      },
     });
+
+    console.log(`[handle-message] Statut mis à jour avec succès`);
 
     /* Envoyer l'email de réponse uniquement si c'est l'admin qui répond */
     if (isAdmin) {
@@ -86,10 +93,11 @@ export async function replyToMessage(messageId: string, replyContent: string) {
       }
     } else {
       /* Si c'est l'utilisateur qui répond, notifier les admins */
+      console.log(`[handle-message] User a répondu, notification admins`);
       sseManager.sendToAdmins({
         type: "new_message",
         data: { messageId, subject: contact.subject || "Message sans objet", from: contact.name },
-      });
+      }, session.user.id);
     }
 
     revalidatePath("/admin/messages");

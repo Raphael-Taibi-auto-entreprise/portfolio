@@ -18,9 +18,12 @@ export function useNotifications(onNotification?: (event: NotificationEvent) => 
   const [notifications, setNotifications] = useState<NotificationEvent[]>([]);
 
   const addNotification = useCallback((event: NotificationEvent) => {
+    console.log("[useNotifications] Event reçu:", event.type);
     if (event.type !== "connected") {
       setNotifications(prev => [...prev, event]);
       onNotification?.(event);
+    } else {
+      console.log("[useNotifications] Connecté au SSE:", event.data);
     }
   }, [onNotification]);
 

@@ -37,12 +37,13 @@ export default async function MesMessagesPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-6">
-      <div className="max-w-5xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Mes messages</h1>
-          <p className="text-gray-600">Consultez vos échanges et répondez aux messages</p>
-        </div>
+    <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-5xl mx-auto py-12 px-6">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">Mes messages</h1>
+            <p className="text-gray-600">Consultez vos échanges et répondez aux messages</p>
+          </div>
 
         {messages.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
@@ -67,6 +68,7 @@ export default async function MesMessagesPage() {
             ))}
           </div>
         )}
+        </div>
       </div>
     </div>
   );

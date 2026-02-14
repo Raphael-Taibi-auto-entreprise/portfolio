@@ -9,9 +9,14 @@ import { sseManager } from "@/lib/sse-manager";
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
 
+  console.log("[SSE] Tentative de connexion, session:", session?.user?.email);
+
   if (!session?.user) {
+    console.log("[SSE] Rejeté: non authentifié");
     return new Response("Non authentifié", { status: 401 });
   }
+
+  console.log("[SSE] Connexion acceptée pour:", session.user.email, "role:", session.user.role);
 
   /* Headers SSE */
   const headers = new Headers({
@@ -33,10 +38,12 @@ export async function GET(request: Request) {
 
       /* Ajouter le client au gestionnaire SSE */
       const abortController = new AbortController();
+      console.log("[SSE] Ajout client:", session.user.email);
       sseManager.addClient(session.user.id, session.user.role || "user", controller, abortController.signal);
 
       /* Nettoyer à la fermeture */
       request.signal.addEventListener("abort", () => {
+        console.log("[SSE] Déconnexion client:", session.user.email);
         abortController.abort();
         controller.close();
       });

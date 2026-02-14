@@ -22,6 +22,7 @@ class SSEManager {
     }
     
     this.clients.get(userId)!.push({ userId, role, controller, signal });
+    console.log(`[SSEManager] Client ajouté: ${userId} (${role}), total clients: ${this.clients.size}`);
     
     /* Nettoyer à la déconnexion */
     signal.addEventListener('abort', () => {
@@ -48,28 +49,35 @@ class SSEManager {
    * Envoie un événement à un utilisateur spécifique
    */
   sendToUser(userId: string, event: { type: string; data: any }) {
+    console.log(`[SSEManager] Envoi à user ${userId}:`, event.type);
     const userClients = this.clients.get(userId);
     if (userClients) {
       const message = `data: ${JSON.stringify(event)}\n\n`;
       userClients.forEach(client => {
         try {
           client.controller.enqueue(new TextEncoder().encode(message));
+          console.log(`[SSEManager] ✓ Message envoyé à ${userId}`);
         } catch (error) {
-          console.error('Erreur envoi SSE:', error);
+          console.error('[SSEManager] Erreur envoi SSE:', error);
         }
       });
+    } else {
+      console.log(`[SSEManager] ⚠ Aucun client connecté pour ${userId}`);
     }
   }
 
   /**
    * Envoie un événement à tous les admins connectés
    */
-  sendToAdmins(event: { type: string; data: any }) {
+  sendToAdmins(event: { type: string; data: any; }, id: string) {
+    console.log(`[SSEManager] Envoi aux admins:`, event.type);
     const message = `data: ${JSON.stringify(event)}\n\n`;
+    let adminCount = 0;
     
     this.clients.forEach((clients) => {
       clients.forEach(client => {
         if (client.role === 'admin') {
+          adminCount++;
           try {
             client.controller.enqueue(new TextEncoder().encode(message));
           } catch (error) {
@@ -78,6 +86,8 @@ class SSEManager {
         }
       });
     });
+    
+    console.log(`[SSEManager] Message envoyé à ${adminCount} admin(s)`);
   }
 
   /**
@@ -97,8 +107,16 @@ class SSEManager {
   }
 }
 
-/* Instance singleton */
-export const sseManager = new SSEManager();
+/* Instance singleton avec globalThis pour persister entre les rebuilds Next.js */
+const globalForSSE = globalThis as unknown as {
+  sseManager: SSEManager | undefined;
+};
+
+if (!globalForSSE.sseManager) {
+  globalForSSE.sseManager = new SSEManager();
+}
+
+export const sseManager = globalForSSE.sseManager;
 
 /* Keepalive toutes les 30 secondes */
 if (typeof window === 'undefined') {

@@ -27,7 +27,7 @@ type MessageThreadViewProps = {
 };
 
 export default function MessageThreadView({ message, userId }: MessageThreadViewProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [replyText, setReplyText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -63,6 +63,7 @@ export default function MessageThreadView({ message, userId }: MessageThreadView
       }
 
       setReplyText("");
+      /* Rafraîchir les données sans fermer la conversation */
       window.location.reload();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Une erreur est survenue");
@@ -108,9 +109,11 @@ export default function MessageThreadView({ message, userId }: MessageThreadView
 
       {/* Contenu développé */}
       {isExpanded && (
-        <div className="border-t border-gray-200">
-          {/* Message initial */}
-          <div className="p-6 bg-gray-50">
+        <div className="border-t border-gray-200 flex flex-col" style={{ maxHeight: 'calc(100vh - 250px)' }}>
+          {/* Zone des messages avec scroll */}
+          <div className="flex-1 overflow-y-auto">
+            {/* Message initial */}
+            <div className="p-6 bg-gray-50">
             <div className="flex items-start gap-3 mb-3">
               <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
                 <User size={20} className="text-blue-600" />
@@ -157,8 +160,10 @@ export default function MessageThreadView({ message, userId }: MessageThreadView
             </div>
           ))}
 
-          {/* Formulaire de réponse */}
-          <div className="p-6 border-t border-gray-200 bg-gray-50">
+          </div>
+          
+          {/* Formulaire de réponse fixe en bas */}
+          <div className="p-6 border-t border-gray-200 bg-gray-50 flex-shrink-0">
             <form onSubmit={handleSubmitReply} className="space-y-4">
               <div>
                 <label htmlFor="reply" className="block text-sm font-medium text-gray-700 mb-2">

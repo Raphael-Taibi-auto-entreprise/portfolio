@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import MessageReplyForm from "@/components/forms/MessageReplyForm";
 import { User, UserCircle } from "lucide-react";
 
@@ -26,8 +27,9 @@ interface MessageThreadProps {
 }
 
 export default function MessageThread({ message, replies }: MessageThreadProps) {
-  const [showReplyForm, setShowReplyForm] = useState(false);
+  const [showReplyForm, setShowReplyForm] = useState(true);
   const { data: session } = useSession();
+  const router = useRouter();
   const isAdmin = session?.user?.role === "admin";
 
   /* Détermine le nom d'affichage de l'utilisateur */
@@ -44,9 +46,11 @@ export default function MessageThread({ message, replies }: MessageThreadProps) 
   const userDisplayName = getUserDisplayName();
 
   return (
-    <div className="space-y-6">
-      {/* Message initial - toujours de l'utilisateur dans ce composant */}
-      <div className="flex gap-4">
+    <div className="h-full flex flex-col">
+      {/* Zone des messages avec scroll */}
+      <div className="flex-1 overflow-y-auto space-y-6 pr-2">
+        {/* Message initial - toujours de l'utilisateur dans ce composant */}
+        <div className="flex gap-4">
         <div className="flex-shrink-0">
           <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
             <User size={20} className="text-blue-600" />
@@ -111,9 +115,10 @@ export default function MessageThread({ message, replies }: MessageThreadProps) 
           </div>
         );
       })}
+      </div>
 
-      {/* Formulaire de réponse */}
-      <div className="pt-4 border-t">
+      {/* Formulaire de réponse fixe en bas */}
+      <div className="flex-shrink-0 pt-4 border-t bg-white sticky bottom-0">
         {!showReplyForm ? (
           <button
             onClick={() => setShowReplyForm(true)}
@@ -126,13 +131,13 @@ export default function MessageThread({ message, replies }: MessageThreadProps) 
             <h3 className="font-semibold mb-3">Nouvelle réponse</h3>
             <MessageReplyForm
               messageId={message.id}
-              onSuccess={() => setShowReplyForm(false)}
+              onSuccess={() => router.refresh()}
             />
             <button
               onClick={() => setShowReplyForm(false)}
               className="mt-2 text-gray-600 hover:text-gray-800"
             >
-              Annuler
+              Masquer le formulaire
             </button>
           </div>
         )}

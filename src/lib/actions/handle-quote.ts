@@ -97,7 +97,6 @@ export async function rejectQuote(quoteId: string, reason?: string) {
         data: { quoteId, status: "rejected", projectType: quote.projectType },
       });
     }
-    }
     
     revalidatePath("/admin/devis");
     return { success: true };

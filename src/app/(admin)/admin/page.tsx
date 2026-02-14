@@ -1,57 +1,53 @@
-import { prisma } from '@/lib/prisma';
+"use client";
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Bell } from 'lucide-react';
+import { useNotifications } from '@/hooks/useNotifications';
+import { useRouter } from 'next/navigation';
 
-export default async function AdminDashboardPage() {
-    /* Récupère les stats avec filtres sur les statuts */
-    const [
-        unreadMessages,
-        totalMessages,
-        pendingQuotes,
-        totalQuotes,
-        pendingReviews,
-        totalReviews,
-        projectsCount
-    ] = await Promise.all([
-        prisma.contact.count({ where: { status: 'unread' } }),
-        prisma.contact.count(),
-        prisma.quote.count({ where: { status: 'pending' } }),
-        prisma.quote.count(),
-        prisma.review.count({ where: { status: 'pending' } }),
-        prisma.review.count(),
-        prisma.project.count(),
+export default function AdminDashboardPage() {
+    const router = useRouter();
+    const [stats, setStats] = useState([
+        { title: "Messages", count: 0, pending: 0, color: "bg-blue-500", href: "/admin/messages" },
+        { title: "Devis", count: 0, pending: 0, color: "bg-green-500", href: "/admin/devis" },
+        { title: "Avis", count: 0, pending: 0, color: "bg-yellow-500", href: "/admin/avis" },
+        { title: "Projets publiés", count: 0, pending: 0, color: "bg-red-500", href: "/admin/projets" },
     ]);
 
-    const stats = [
-        { 
-            title: "Messages", 
-            count: totalMessages, 
-            pending: unreadMessages,
-            color: "bg-blue-500", 
-            href: "/admin/messages" 
-        },
-        { 
-            title: "Devis", 
-            count: totalQuotes, 
-            pending: pendingQuotes,
-            color: "bg-green-500", 
-            href: "/admin/devis" 
-        },
-        { 
-            title: "Avis", 
-            count: totalReviews, 
-            pending: pendingReviews,
-            color: "bg-yellow-500", 
-            href: "/admin/avis" 
-        },
-        { 
-            title: "Projets publiés", 
-            count: projectsCount, 
-            pending: 0,
-            color: "bg-red-500", 
-            href: "/admin/projets" 
-        },
-    ];
+    /* Charger les statistiques initiales */
+    useEffect(() => {
+        const loadStats = async () => {
+            const [statsRes, notifRes] = await Promise.all([
+                fetch('/api/admin/stats'),
+                fetch('/api/notifications/count')
+            ]);
+            
+            const statsData = await statsRes.json();
+            const notifData = await notifRes.json();
+
+            setStats([
+                { title: "Messages", count: statsData.totalMessages, pending: notifData.unreadMessages || 0, color: "bg-blue-500", href: "/admin/messages" },
+                { title: "Devis", count: statsData.totalQuotes, pending: notifData.unreadQuotes || 0, color: "bg-green-500", href: "/admin/devis" },
+                { title: "Avis", count: statsData.totalReviews, pending: notifData.pendingReviews || 0, color: "bg-yellow-500", href: "/admin/avis" },
+                { title: "Projets publiés", count: statsData.projectsCount, pending: 0, color: "bg-red-500", href: "/admin/projets" },
+            ]);
+        };
+
+        loadStats();
+    }, []);
+
+    /* Écouter les notifications SSE pour mettre à jour en temps réel */
+    useNotifications((event) => {
+        if (event.type === "new_message") {
+            setStats(prev => prev.map(s => 
+                s.title === "Messages" ? { ...s, pending: s.pending + 1 } : s
+            ));
+            router.refresh();
+        } else if (event.type === "quote_status_changed") {
+            router.refresh();
+        }
+    });
 
     return (
         <div className='p-8 bg-gray-50 min-h-screen'>
