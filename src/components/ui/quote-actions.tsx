@@ -4,6 +4,7 @@ import { useState } from "react";
 import { approveQuote, rejectQuote, negotiateQuote } from "@/lib/actions/handle-quote";
 import { Check, X, MessageSquare } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/ui/useToast";
 
 interface QuoteActionsProps {
   quote: {
@@ -17,25 +18,37 @@ export default function QuoteActions({ quote }: QuoteActionsProps) {
   const [newDeadline, setNewDeadline] = useState("");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const router = useRouter();
+  const toast = useToast();
 
   const handleApprove = async () => {
     setIsLoading(true);
     const result = await approveQuote(quote.id);
     if (result.success) {
+      toast.success("Devis approuvé avec succès");
       router.refresh();
+    } else {
+      toast.error(result.error || "Échec de l'approbation du devis");
     }
     setIsLoading(false);
   };
 
   const handleReject = async () => {
-    if (!confirm("Êtes-vous sûr de vouloir refuser ce devis ?")) return;
+    if (!showConfirm) {
+      setShowConfirm(true);
+      return;
+    }
     
     setIsLoading(true);
     const result = await rejectQuote(quote.id);
     if (result.success) {
+      toast.success("Devis refusé");
       router.refresh();
+    } else {
+      toast.error(result.error || "Échec du rejet du devis");
     }
+    setShowConfirm(false);
     setIsLoading(false);
   };
 
@@ -43,17 +56,20 @@ export default function QuoteActions({ quote }: QuoteActionsProps) {
     e.preventDefault();
     
     if (!newDeadline.trim()) {
-      alert("Veuillez entrer une nouvelle deadline");
+      toast.warning("Veuillez entrer une nouvelle deadline");
       return;
     }
 
     setIsLoading(true);
     const result = await negotiateQuote(quote.id, newDeadline, message);
     if (result.success) {
+      toast.success("Proposition de négociation envoyée");
       setIsNegotiating(false);
       setNewDeadline("");
       setMessage("");
       router.refresh();
+    } else {
+      toast.error(result.error || "Échec de la négociation");
     }
     setIsLoading(false);
   };
@@ -78,6 +94,27 @@ export default function QuoteActions({ quote }: QuoteActionsProps) {
     <div className="border-t pt-6">
       <h3 className="font-semibold text-lg mb-4">Actions</h3>
       
+      {showConfirm && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+          <p className="text-red-800 mb-3">Êtes-vous sûr de vouloir refuser ce devis ?</p>
+          <div className="flex gap-3">
+            <button
+              onClick={handleReject}
+              disabled={isLoading}
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors disabled:bg-gray-400"
+            >
+              Oui, refuser
+            </button>
+            <button
+              onClick={() => setShowConfirm(false)}
+              className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg transition-colors"
+            >
+              Annuler
+            </button>
+          </div>
+        </div>
+      )}
+      
       {!isNegotiating ? (
         <div className="flex gap-3 flex-wrap">
           <button
@@ -90,7 +127,7 @@ export default function QuoteActions({ quote }: QuoteActionsProps) {
           </button>
 
           <button
-            onClick={handleReject}
+            onClick={() => setShowConfirm(true)}
             disabled={isLoading}
             className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors disabled:bg-gray-400"
           >

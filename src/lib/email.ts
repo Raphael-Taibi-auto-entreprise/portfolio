@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+const EMAIL_SENDER = process.env.EMAIL_FROM?.replace(/['",]/g, '').trim() || 'onboarding@resend.dev';
 
 /**
  * Envoie un email de réponse à un message de contact
@@ -18,7 +19,7 @@ export async function sendContactReplyEmail({
 }) {
   try {
     const { data, error } = await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'Portfolio <onboarding@resend.dev>',
+      from: EMAIL_SENDER,
       to: [to],
       subject: `Re: ${subject}`,
       html: `
@@ -87,7 +88,7 @@ export async function sendQuoteApprovedEmail({
 }) {
   try {
     const { data, error } = await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'Portfolio <onboarding@resend.dev>',
+      from: EMAIL_SENDER,
       to: [to],
       subject: '✅ Votre devis a été approuvé',
       html: `
@@ -156,7 +157,7 @@ export async function sendQuoteRejectedEmail({
 }) {
   try {
     const { data, error } = await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'Portfolio <onboarding@resend.dev>',
+      from: EMAIL_SENDER,
       to: [to],
       subject: 'Réponse à votre demande de devis',
       html: `
@@ -231,7 +232,7 @@ export async function sendQuoteNegotiationEmail({
 
   try {
     const { data, error } = await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'Portfolio <onboarding@resend.dev>',
+      from: EMAIL_SENDER,
       to: [to],
       subject: '💬 Proposition alternative pour votre devis',
       html: `

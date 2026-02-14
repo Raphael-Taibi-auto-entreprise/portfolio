@@ -52,7 +52,14 @@ export default async function MonComptePage() {
         {/* En-tête */}
         <div className="bg-white rounded-xl shadow-md border border-gray-100 p-8 mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-3xl font-bold text-gray-900">Mon compte</h1>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Mon compte</h1>
+              <p className="text-gray-600 mt-1">
+                {user?.firstName && user?.lastName 
+                  ? `${user.firstName} ${user.lastName}` 
+                  : `@${user?.username}`}
+              </p>
+            </div>
             <Link
               href="/mon-compte/modifier"
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
@@ -104,6 +111,10 @@ export default async function MonComptePage() {
                 IDENTITÉ
               </h3>
               <div className="space-y-2">
+                <div>
+                  <span className="text-sm text-gray-500">Nom d'utilisateur</span>
+                  <p className="text-gray-900">@{user?.username}</p>
+                </div>
                 <div>
                   <span className="text-sm text-gray-500">Prénom</span>
                   <p className="text-gray-900">{user?.firstName || <span className="text-gray-400 italic">Non renseigné</span>}</p>

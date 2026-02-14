@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { sseManager } from "@/lib/sse-manager";
 
 export async function GET() {
   const quotes = await prisma.quote.findMany({
@@ -25,6 +26,17 @@ export async function POST(req: NextRequest) {
         userId: data.userId || null,
       },
     });
+
+    /* Notifier les admins du nouveau devis */
+    sseManager.sendToAdmins({
+      type: "new_quote",
+      data: { 
+        quoteId: newQuote.id, 
+        projectType: newQuote.projectType, 
+        from: newQuote.name 
+      },
+    });
+
     return NextResponse.json(newQuote, { status: 201 });
   } catch (e) {
     console.error("Error creating quote:", e);

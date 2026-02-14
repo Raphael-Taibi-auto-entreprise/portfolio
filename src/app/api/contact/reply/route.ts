@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { nanoid } from "nanoid";
+import { sseManager } from "@/lib/sse-manager";
 
 /**
  * API POST pour permettre aux utilisateurs de répondre à leurs messages
@@ -50,13 +51,24 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    /* Mettre à jour le statut du message à "read" si ce n'est pas déjà fait */
-    if (contact.status === "unread") {
-      await prisma.contact.update({
-        where: { id: contactId },
-        data: { status: "read" },
-      });
-    }
+    console.log(`[API contact/reply] User répond, passage du statut ${contact.status} → unread`);
+
+    /* Mettre à jour le statut à "unread" pour que l'admin soit notifié */
+    await prisma.contact.update({
+      where: { id: contactId },
+      data: { status: "unread" },
+    });
+
+    /* Notifier les admins qu'il y a un nouveau message de l'utilisateur */
+    console.log(`[API contact/reply] Notification des admins`);
+    sseManager.sendToAdmins({
+      type: "new_message",
+      data: { 
+        messageId: contactId, 
+        subject: contact.subject || "Message sans objet", 
+        from: contact.name 
+      },
+    }, session.user.id);
 
     return NextResponse.json(
       { success: true, reply },
