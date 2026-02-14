@@ -69,7 +69,7 @@ class SSEManager {
   /**
    * Envoie un événement à tous les admins connectés
    */
-  sendToAdmins(event: { type: string; data: any; }, id: string) {
+  sendToAdmins(event: { type: string; data: any; }) {
     console.log(`[SSEManager] Envoi aux admins:`, event.type);
     const message = `data: ${JSON.stringify(event)}\n\n`;
     let adminCount = 0;
@@ -118,7 +118,7 @@ if (!globalForSSE.sseManager) {
 
 export const sseManager = globalForSSE.sseManager;
 
-/* Keepalive toutes les 30 secondes */
+/* Keep alive toutes les 30 secondes */
 if (typeof window === 'undefined') {
   setInterval(() => {
     sseManager.sendKeepalive();
